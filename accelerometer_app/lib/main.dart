@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'dart:html' as html;
 import 'package:flutter/material.dart';
@@ -39,31 +40,47 @@ class AccelerometerDataWidget extends StatefulWidget {
 
 class _AccelerometerDataWidgetState extends State<AccelerometerDataWidget> {
   List<double> accelerometerValues = [0, 0, 0];
+  final _streamSubscriptions = <StreamSubscription<dynamic>>[];
 
   @override
   void initState() {
     super.initState();
-    _requestSensorPermission();
-    accelerometerEvents.listen((AccelerometerEvent event) {
-      setState(() {
-        accelerometerValues = [event.x, event.y, event.z];
-      });
-    });
+    _streamSubscriptions.add(
+      userAccelerometerEvents.listen(
+        (UserAccelerometerEvent event) {
+          setState(() {
+            accelerometerValues = <double>[event.x, event.y, event.z];
+          });
+        },
+        onError: (e) {
+          showDialog(
+              context: context,
+              builder: (context) {
+                return const AlertDialog(
+                  title: Text("Sensor Not Found"),
+                  content: Text(
+                      "It seems that your device doesn't support Accelerometer Sensor"),
+                );
+              });
+        },
+        cancelOnError: true,
+      ),
+    );
   }
 
   // Request sensor permission using JavaScript interop
-  void _requestSensorPermission() {
-    html.window.navigator.permissions!
-        .query({'name': 'accelerometer'}).then((html.PermissionStatus status) {
-      if (status.state == 'granted') {
-        print('Accelerometer permission granted.');
-      } else if (status.state == 'prompt') {
-        print('Requesting accelerometer permission.');
-      } else {
-        print('Accelerometer permission denied.');
-      }
-    });
-  }
+  // void _requestSensorPermission() {
+  //   html.window.navigator.permissions!
+  //       .query({'name': 'accelerometer'}).then((html.PermissionStatus status) {
+  //     if (status.state == 'granted') {
+  //       print('Accelerometer permission granted.');
+  //     } else if (status.state == 'prompt') {
+  //       print('Requesting accelerometer permission.');
+  //     } else {
+  //       print('Accelerometer permission denied.');
+  //     }
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
