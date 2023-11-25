@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:sensors_plus/sensors_plus.dart';
-import 'dart:html' as html;
 import 'package:flutter/material.dart';
 
 void main() {
